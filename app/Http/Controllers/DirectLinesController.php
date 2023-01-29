@@ -19,7 +19,35 @@ class DirectLinesController extends Controller
         $data['all_sources'] = DB::table('cities')->join('direct_lines', 'cities.id', '=', 'direct_lines.source_city_id')->get()->pluck('name')->unique();
         $data['all_destinations'] = DB::table('cities')->join('direct_lines', 'cities.id', '=', 'direct_lines.destination_city_id')->get()->pluck('name')->unique();;
 
-        return response()->json(['data' => [$data], 'msg' => 'it works.']);
+        return view("direct_lines.index", compact('data'));
+        // return response()->json(['data' => [$data], 'msg' => 'it works.']);
+    }
+
+    public function startingPoints(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'term' => 'required|alpha|min:3'
+        ]);
+        
+        // dd(DB::table('cities')->where('name', ''));
+        $term = $request->term;
+        $data = DB::table('cities')->join('direct_lines', 'cities.id', '=', 'direct_lines.source_city_id')
+            ->where('cities.name', 'LIKE', '%' . $term . '%')
+            ->get()
+            ->pluck('name')
+            ->unique();
+
+        return response()->json(['data' => $data, 'msg' => 'ok'], 200);
+    }
+
+    public function destinationPoinst()
+    {
+        dd($request->all());
+        $request->validate([
+            'term' => 'required|alpha',
+            'starting_point' => 'required|alpha'
+        ]);
     }
 
     /**
