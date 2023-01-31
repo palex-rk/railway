@@ -25,29 +25,34 @@ class DirectLinesController extends Controller
 
     public function startingPoints(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'term' => 'required|alpha|min:3'
         ]);
-        
-        // dd(DB::table('cities')->where('name', ''));
+
         $term = $request->term;
         $data = DB::table('cities')->join('direct_lines', 'cities.id', '=', 'direct_lines.source_city_id')
             ->where('cities.name', 'LIKE', '%' . $term . '%')
+            ->select('cities.id', 'cities.name')
             ->get()
-            ->pluck('name')
             ->unique();
 
-        return response()->json(['data' => $data, 'msg' => 'ok'], 200);
+        return response()->json(['cities' => $data], 200);
     }
 
-    public function destinationPoinst()
+    public function destinationPoints(Request $request)
     {
-        dd($request->all());
+        dd($request->all(), 'hi there');
         $request->validate([
-            'term' => 'required|alpha',
+            // 'term' => 'required|alpha',
             'starting_point' => 'required|alpha'
         ]);
+
+        $data = DB::table('cities')->join('direct_lines', 'cities.id', '=', 'direct_lines.destination_city_id')
+            ->where('direct_lines.source_city_id', '=', DB::raw("(SELECT id FROM cities WHERE cities.name = $request->startingpoint )"))
+            ->get();
+            //DB::raw("(SELECT status FROM task_user WHERE tasks.id = task_user.task_id AND user_id = $user_id) as user_task_status")
+
+        return response()->json(['cities' => $data], 200);
     }
 
     /**
