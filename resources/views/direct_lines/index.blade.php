@@ -26,12 +26,17 @@
     </nav>
     <div class="container float-start">
         <h4>RELATIONS:</h4>
+        
+        <form action="{{ route('results') }}" method="POST" id="results-form">
         <p class="mb-3">
             FROM:
             <select class="col-md-3 select" id="source_city" style="width:500px;" name="source_city"></select>
             TO:
             <select class="col-md-3 select" id="destination_city" style="width:500px;" name="destination_city"></select>
         </p>
+            @csrf
+            <button type="submit" id="form-btn" class="btn btn-info">Show data</button>
+        </form>
         
     </div>
     
@@ -100,16 +105,25 @@
                         return queryParameters;
                     },
                     processResults: function (data) {
+                        
                         return {
-                            results: $.map(data, function (item) {
-                                return 
-                                    text: item.name
-                                
+                            results: $.map(data.cities, function (city) {
+                        
+                                return {
+                                    text: city.name,
+                                    id: city.id
+                                }
                             })
                         };
                     },
                     cache: true
                 }
+            });
+            
+            $('#form-btn').on('click', function() {
+                $source = $('#source_city').value;
+                $dest = $('#destination_city').value;
+                $('#results-form').submit();
             });
         });
     </script>

@@ -30,7 +30,8 @@ class DirectLinesController extends Controller
         ]);
 
         $term = $request->term;
-        $data = DB::table('cities')->join('direct_lines', 'cities.id', '=', 'direct_lines.source_city_id')
+        $data = DB::table('cities')
+            ->join('direct_lines', 'cities.id', '=', 'direct_lines.source_city_id')
             ->where('cities.name', 'LIKE', '%' . $term . '%')
             ->select('cities.id', 'cities.name')
             ->get()
@@ -41,83 +42,39 @@ class DirectLinesController extends Controller
 
     public function destinationPoints(Request $request)
     {
-        dd($request->all(), 'hi there');
         $request->validate([
-            // 'term' => 'required|alpha',
+            'term' => 'nullable|alpha',
             'starting_point' => 'required|alpha'
         ]);
 
-        $data = DB::table('cities')->join('direct_lines', 'cities.id', '=', 'direct_lines.destination_city_id')
-            ->where('direct_lines.source_city_id', '=', DB::raw("(SELECT id FROM cities WHERE cities.name = $request->startingpoint )"))
+        $starting_point_id = City::where('name', 'LIKE', '%' . $request->starting_point . '%')->select('id')->first()->id;
+ 
+        $data = DB::table('cities')
+            ->join('direct_lines', 'cities.id', '=', 'direct_lines.destination_city_id')
+            ->where('direct_lines.source_city_id', '=', $starting_point_id)
+            ->where('cities.name', 'LIKE', '%' . $request->term . '%')
+            ->select('cities.name', 'cities.id')
             ->get();
-            //DB::raw("(SELECT status FROM task_user WHERE tasks.id = task_user.task_id AND user_id = $user_id) as user_task_status")
+
+        // dd($data);
 
         return response()->json(['cities' => $data], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function results(Request $request)
     {
-        //
-    }
+        // dd($request->all());
+        $request->validate([
+            'source_city' => 'required|integer',
+            'destination_city' => 'required|integer'
+        ]);
+        $source_city = City::findOrFail($request->source_city);
+        $destination_city = City::findOrFail($request->destination_city);
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\DirectLines  $directLines
-     * @return \Illuminate\Http\Response
-     */
-    public function show(DirectLines $directLines)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\DirectLines  $directLines
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(DirectLines $directLines)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\DirectLines  $directLines
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, DirectLines $directLines)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\DirectLines  $directLines
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(DirectLines $directLines)
-    {
-        //
+        $data = DB::table('direct_lines')
+            ->where('source_city_id', $source_city->id)
+            ->where('destination_city_id', $destination_city->id)
+            ->get();
+        dd($data);
     }
 }

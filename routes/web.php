@@ -26,9 +26,9 @@ Route::prefix('ajax')->group(function(){
     Route::post('destination-cities', [DirectLinesController::class, 'destinationPoints'])->name('destination-point');
 });
 
-// Route::post('source-cities', [DirectLinesController::class, 'startingPoints'])->name('start-point');
+Route::post('results', [DirectLinesController::class, 'results'])->name('results');
 
 Route::get('123', function(){
-    // $cities = City::all()->update(['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+    $cities = City::all()->update(['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
     DB::table('DIRECT_LINES')->update(['created_at' =>Carbon::now(), 'updated_at' => Carbon::now()]);
 });
