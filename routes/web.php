@@ -16,10 +16,7 @@ use App\Http\Controllers\DirectLinesController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-Route::get('/', [DirectLinesController::class, 'index']);
+Route::get('/', [DirectLinesController::class, 'index'])->name('index');
 
 Route::prefix('ajax')->group(function(){
     Route::post('source-cities', [DirectLinesController::class, 'startingPoints'])->name('start-point');
@@ -28,7 +25,7 @@ Route::prefix('ajax')->group(function(){
 
 Route::post('results', [DirectLinesController::class, 'results'])->name('results');
 
-Route::get('123', function(){
-    $cities = City::all()->update(['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-    DB::table('DIRECT_LINES')->update(['created_at' =>Carbon::now(), 'updated_at' => Carbon::now()]);
+Route::get('123', function() {
+    echo DB::table('cities')->update(['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);echo "<hr>";
+    echo DB::table('direct_lines')->update(['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
 });

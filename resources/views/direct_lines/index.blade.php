@@ -18,25 +18,78 @@
     <title>Railroad task</title>
     <style>
         .select2-results__option { background-color: aqua;}
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            height: 60px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .select {
+            width: 100%;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .select {
+                width: 80%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <nav class="navbar">
-
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark mb-2">
+        <a class="navbar-brand text-light" href="{{ route('index') }}">HOMEPAGE</a>
+        <a class="navbar-brand text-light" href="https://www.zwebb.rs" target="blank">ZWEBB</a>
     </nav>
     <div class="container float-start">
-        <h4>RELATIONS:</h4>
+        <h4>TRAIN SCHEDULE:</h4>
         
         <form action="{{ route('results') }}" method="POST" id="results-form">
-        <p class="mb-3">
-            FROM:
-            <select class="col-md-3 select" id="source_city" style="width:500px;" name="source_city"></select>
-            TO:
-            <select class="col-md-3 select" id="destination_city" style="width:500px;" name="destination_city"></select>
-        </p>
             @csrf
-            <button type="submit" id="form-btn" class="btn btn-info">Show data</button>
+            <p class="mb-3">
+                <span>FROM:</span>
+                <select class="col-md-3 select" id="source_city" style="width:500px;" name="source_city"></select>
+                <span>TO:</span>
+                <select class="col-md-3 select" id="destination_city" style="width:500px;" name="destination_city"></select>
+            </p>
+            <button type="button" id="form-btn" class="btn btn-info">Show data</button>
         </form>
+        <table class="table table-striped">
+            <th>Start</th>
+            <th>Destination</th>
+            <th>Termin</th>
+            <tbody id="data-container">
+
+            </tbody>
+        </table>
         
     </div>
     
@@ -120,10 +173,40 @@
                 }
             });
             
-            $('#form-btn').on('click', function() {
-                $source = $('#source_city').value;
-                $dest = $('#destination_city').value;
-                $('#results-form').submit();
+            $('#form-btn').on('click', function(e) {
+                e.preventDefault();
+                let source_city = $('#source_city').val();
+                let destination_city = $('#destination_city').val();
+                console.log(source_city, destination_city);
+
+                $.ajax({
+                    url: "/results",
+                    type:"POST",
+                    data: {
+                        _token:'{{ csrf_token() }}', 
+                        "source_city": source_city, 
+                        "destination_city": destination_city    
+                    },
+                    success:function(response){
+                        var start_point = response.start_point;
+                        var dest_point = response.dest_point;
+                        var termins = response.termins;
+
+                        var table = "";
+                        for (var i = 0; i < termins.length; i++) {
+                        table += "<tr><td>" + start_point + "</td><td>" + dest_point + "</td><td>" + termins[i].termin + "</td></tr>";
+                        }
+
+                        $('#data-container').html(table);
+                    },
+                    error: function(response) {
+                        console.log('errors', response);
+                        // $('#nameErrorMsg').text(response.responseJSON.errors.source_city);
+                        // $('#emailErrorMsg').text(response.responseJSON.errors.destination_city);
+                    },
+                });
+
+                console.log('after submit');
             });
         });
     </script>
